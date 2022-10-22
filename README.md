@@ -1,4 +1,5 @@
-# wp-all-import-rapid-addon Customized by Coding Chicken
+# wp-all-import-rapid-addon  
+### (Customized by Coding Chicken)
 Rapid Add-On API for WP All Import 
 
 This version has been customized by Coding Chicken to be compatible with Composer and to extend some functionality.
