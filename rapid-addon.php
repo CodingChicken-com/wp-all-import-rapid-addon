@@ -368,14 +368,14 @@ if ( ! class_exists( 'Soflyy\WpAllImport\RapidAddon' ) ) {
 
 								// import the specified image, then set the value of the field to the image ID in the media library
 
-                                // Support multiple images delimited by pipes. Future: Add option to set delimiter.
-                                $images_to_process = explode('|', $parsedData[ $field_slug ][ $index ]);
+                                // Support multiple images delimited by double exclamation marks. Future: Add option to set delimiter.
+                                $images_to_process = explode('!!', $parsedData[ $field_slug ][ $index ]);
 
                                 foreach($images_to_process as $image) {
                                     $image_url_or_path = $image;
 
                                     if (!array_key_exists($field_slug, $import_options['download_image'])) {
-                                        continue 2;
+                                        continue 3;
                                     }
 
                                     $download = $import_options['download_image'][$field_slug];
