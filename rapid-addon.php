@@ -364,26 +364,30 @@ if ( ! class_exists( 'Soflyy\WpAllImport\RapidAddon' ) ) {
 						}
 						switch ( $field_params['type'] ) {
 
-							case 'image':
+                            case 'image':
 
 								// import the specified image, then set the value of the field to the image ID in the media library
 
-								$image_url_or_path = $parsedData[ $field_slug ][ $index ];
+                                // Support multiple images delimited by pipes. Future: Add option to set delimiter.
+                                $images_to_process = explode('|', $parsedData[ $field_slug ][ $index ]);
 
-								if ( ! array_key_exists( $field_slug, $import_options['download_image'] ) ) {
-									continue 2;
-								}
+                                foreach($images_to_process as $image) {
+                                    $image_url_or_path = $image;
 
-								$download = $import_options['download_image'][ $field_slug ];
+                                    if (!array_key_exists($field_slug, $import_options['download_image'])) {
+                                        continue 2;
+                                    }
 
-								$uploaded_image = \PMXI_API::upload_image( $post_id, $image_url_or_path, $download, $importData['logger'], true, "", "images", true, $importData['articleData'] );
+                                    $download = $import_options['download_image'][$field_slug];
 
-								$data[ $field_slug ] = array(
-									"attachment_id"     => $uploaded_image,
-									"image_url_or_path" => $image_url_or_path,
-									"download"          => $download
-								);
+                                    $uploaded_image = \PMXI_API::upload_image($post_id, $image_url_or_path, $download, $importData['logger'], true, "", "images", true, $importData['articleData']);
 
+                                    $data[$field_slug][] = array(
+                                        "attachment_id" => $uploaded_image,
+                                        "image_url_or_path" => $image_url_or_path,
+                                        "download" => $download
+                                    );
+                                }
 								break;
 
 							case 'file':
