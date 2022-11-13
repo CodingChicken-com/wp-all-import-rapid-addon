@@ -2,10 +2,11 @@
 /**
  * RapidAddon
  *
- * @package     WP All Import RapidAddon
+ * @package     WP All Import RapidAddon - Coding Chicken mod
  * @copyright   Copyright (c) 2014, Soflyy
  * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
- * @version    2.0
+ * @version     2.0
+ * @author      Modified version by Coding Chicken
  */
 
 namespace Soflyy\WpAllImport;
@@ -368,25 +369,32 @@ if ( ! class_exists( 'Soflyy\WpAllImport\RapidAddon' ) ) {
 
 								// import the specified image, then set the value of the field to the image ID in the media library
 
-                                // Support multiple images delimited by double exclamation marks. Future: Add option to set delimiter.
-                                $images_to_process = explode('!!', $parsedData[ $field_slug ][ $index ]);
+                                // Split records on pipes in case these are passed from a repeater.
+                                $repeater_image_records = explode('|', $parsedData[ $field_slug ][ $index ]);
 
-                                foreach($images_to_process as $image) {
-                                    $image_url_or_path = $image;
+                                // Process repeater rows if they're set using pipes.
+                                foreach($repeater_image_records as $key => $images_to_process) {
 
-                                    if (!array_key_exists($field_slug, $import_options['download_image'])) {
-                                        continue 3;
+                                    // Support multiple images delimited by double exclamation marks. Future: Add option to set delimiter.
+                                    $images_to_process = explode('!!', $images_to_process);
+
+                                    foreach ($images_to_process as $image) {
+                                        $image_url_or_path = $image;
+
+                                        if (!array_key_exists($field_slug, $import_options['download_image'])) {
+                                            continue 4;
+                                        }
+
+                                        $download = $import_options['download_image'][$field_slug];
+
+                                        $uploaded_image = \PMXI_API::upload_image($post_id, $image_url_or_path, $download, $importData['logger'], true, "", "images", true, $importData['articleData']);
+
+                                        $data[$field_slug][$key][] = array(
+                                            "attachment_id" => $uploaded_image,
+                                            "image_url_or_path" => $image_url_or_path,
+                                            "download" => $download
+                                        );
                                     }
-
-                                    $download = $import_options['download_image'][$field_slug];
-
-                                    $uploaded_image = \PMXI_API::upload_image($post_id, $image_url_or_path, $download, $importData['logger'], true, "", "images", true, $importData['articleData']);
-
-                                    $data[$field_slug][] = array(
-                                        "attachment_id" => $uploaded_image,
-                                        "image_url_or_path" => $image_url_or_path,
-                                        "download" => $download
-                                    );
                                 }
 								break;
 
