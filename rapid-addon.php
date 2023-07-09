@@ -5,7 +5,7 @@
  * @package     WP All Import RapidAddon - Coding Chicken mod
  * @copyright   Copyright (c) 2014, Soflyy
  * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
- * @version     2.0
+ * @version     2.0.1
  * @author      Modified version by Coding Chicken
  */
 
@@ -367,6 +367,23 @@ if ( ! class_exists( 'Soflyy\WpAllImport\RapidAddon' ) ) {
 
                             case 'image':
 
+                                // Get allowed mime types.
+                                $mimes = \get_allowed_mime_types();
+
+                                // Get image mimes.
+                                $images_exts = [];
+
+                                // Get list of image extensions.
+                                foreach( $mimes as $ext => $mime ){
+                                    if( strpos($mime, 'image/') !== false ){
+                                        $exts = explode('|', $ext);
+
+                                        foreach( $exts as $ext ){
+                                            $images_exts[] = $ext;
+                                        }
+                                    }
+                                }
+
 								// import the specified image, then set the value of the field to the image ID in the media library
 
                                 // Split records on pipes in case these are passed from a repeater.
@@ -387,7 +404,15 @@ if ( ! class_exists( 'Soflyy\WpAllImport\RapidAddon' ) ) {
 
                                         $download = $import_options['download_image'][$field_slug];
 
-                                        $uploaded_image = \PMXI_API::upload_image($post_id, $image_url_or_path, $download, $importData['logger'], true, "", "images", true, $importData['articleData']);
+                                        // Determine if target file is supported image or some other file type.
+                                        $ext = pathinfo($image_url_or_path, PATHINFO_EXTENSION);
+                                        if( in_array($ext, $images_exts)){
+                                            $file_type = 'images';
+                                        }else{
+                                            $file_type = 'files';
+                                        }
+
+                                        $uploaded_image = \PMXI_API::upload_image($post_id, $image_url_or_path, $download, $importData['logger'], true, "", $file_type, true, $importData['articleData']);
 
                                         $data[$field_slug][$key][] = array(
                                             "attachment_id" => $uploaded_image,
